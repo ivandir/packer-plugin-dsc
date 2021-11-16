@@ -1,0 +1,50 @@
+{
+  "variables": {
+    "vpc_id": "",
+    "subnet_id": "",
+    "source_ami": "",
+    "major_version": "1.0.",
+    "region": "ap-southeast-2",
+    "build_number": "{{env `BUILD_NUMBER`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "winrm_username": "Administrator",
+      "winrm_port": 5985,
+      "user_data_file": "amz.userdata",
+      "communicator": "winrm",
+      "associate_public_ip_address": "true",
+      "ssh_private_ip": "false",
+      "region": "{{user `region`}}",
+      "source_ami": "{{user `source_ami`}}",
+      "vpc_id": "{{user `vpc_id`}}",
+      "subnet_id": "{{user `subnet_id`}}",
+      "instance_type": "t2.medium",
+      "ami_name": "beanstalk-iis-{{user `major_version`}}.{{user `build_number`}}",
+      "ami_description": "Beanstalk IIS"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "dsc",
+      "configuration_name": "Beanstalk",
+      "configuration_file": "manifests/BeanstalkConfig.psd1",
+      "manifest_file": "manifests/Beanstalk.ps1",
+      "module_paths": [
+        "modules"
+      ],
+      "install_package_management": true,
+      "install_modules": {
+        "xWebAdministration": "1.10.0.0"
+      },
+      "module_paths": [
+        "modules"
+      ],      
+      "configuration_params": {
+        "-WebAppPath": "c:\\tmp",
+        "-MachineName": "localhost"
+      }
+    }
+  ]
+}
